@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <section className="h-[200vh] bg-black" />
+      <section className=" bg-black" />
     </main>
   )
 }

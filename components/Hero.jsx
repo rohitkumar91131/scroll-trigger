@@ -2,85 +2,98 @@
 
 import { useEffect, useRef } from "react"
 import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Hero() {
-  const headlineRef = useRef(null)
-  const statsRef = useRef([])
+  const containerRef = useRef(null)
+  const revealRef = useRef(null)
   const carRef = useRef(null)
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".letter", {
-        y: 40,
-        opacity: 0,
-        stagger: 0.05,
-        duration: 1,
-        ease: "power3.out"
+    let ctx = gsap.context(() => {
+
+      gsap.set(".stat", { x: -200, opacity: 0 })
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=200%",
+          scrub: 1,
+          pin: true
+        }
       })
 
-      gsap.from(statsRef.current, {
-        y: 20,
-        opacity: 0,
-        stagger: 0.2,
-        delay: 0.8,
-        duration: 0.8,
-        ease: "power3.out"
-      })
-    })
+      tl.to(revealRef.current, {
+        clipPath: "inset(0% 0% 0% 0%)",
+        ease: "none"
+      }, 0)
+
+      tl.to(carRef.current, {
+        x: "100vw",
+        ease: "none"
+      }, 0)
+
+      tl.to(".stat", {
+        x: 0,
+        opacity: 1,
+        stagger: 0.15
+      }, 0.25)
+
+    }, containerRef)
 
     return () => ctx.revert()
   }, [])
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY
-      const progress = scrollY / window.innerHeight
-
-      gsap.to(carRef.current, {
-        x: progress * 400,
-        rotate: progress * 10,
-        ease: "power2.out",
-        duration: 0.3
-      })
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  const headline = "WELCOME ITZFIZZ".split("")
-
   return (
-    <section className="h-screen flex flex-col justify-center items-center relative overflow-hidden">
-      
-      <h1
-        ref={headlineRef}
-        className="text-4xl md:text-6xl tracking-[0.6em] font-light mb-10"
-      >
-        {headline.map((letter, i) => (
-          <span key={i} className="letter inline-block">
-            {letter}
-          </span>
-        ))}
-      </h1>
+    <section
+      ref={containerRef}
+      className="h-[100dvh] bg-[#222] relative overflow-hidden flex items-center justify-center"
+    >
 
-      <div className="flex gap-12 text-center">
-        {["85% Speed", "120% Growth", "98% Efficiency"].map((item, i) => (
-          <div
-            key={i}
-            ref={(el) => (statsRef.current[i] = el)}
-            className="text-sm md:text-lg font-light opacity-80"
-          >
-            {item}
-          </div>
-        ))}
+      <div
+        ref={revealRef}
+        className="absolute inset-0 bg-[#4ade80] flex items-center justify-center z-0"
+        style={{ clipPath: "inset(0% 100% 0% 0%)" }}
+      >
+        <h1 className="text-black text-6xl md:text-9xl tracking-[0.2em] font-bold uppercase">
+          Welcome
+        </h1>
       </div>
 
       <img
         ref={carRef}
         src="/car.png"
-        className="absolute bottom-10 left-10 w-48 md:w-72"
+        className="absolute top-1/2 -translate-y-1/2 -left-[10%] w-48 md:w-80 z-10"
+        alt="Car"
       />
+
+      <div className="absolute top-20 left-20 flex gap-6 z-20">
+        <div className="stat bg-lime-400 text-black p-6 rounded-xl w-60">
+          <h2 className="text-4xl font-bold">58%</h2>
+          <p>Increase in pick up point use</p>
+        </div>
+
+        <div className="stat bg-black text-white p-6 rounded-xl w-60">
+          <h2 className="text-4xl font-bold">27%</h2>
+          <p>Increase in pick up point use</p>
+        </div>
+      </div>
+
+      <div className="absolute bottom-20 left-20 flex gap-6 z-20">
+        <div className="stat bg-sky-400 text-black p-6 rounded-xl w-60">
+          <h2 className="text-4xl font-bold">23%</h2>
+          <p>Decreased in customer phone calls</p>
+        </div>
+
+        <div className="stat bg-orange-500 text-black p-6 rounded-xl w-60">
+          <h2 className="text-4xl font-bold">40%</h2>
+          <p>Decreased in customer phone calls</p>
+        </div>
+      </div>
+
     </section>
   )
 }
